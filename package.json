@@ -1,0 +1,48 @@
+{
+  "name": "petgpt-plugin-poe",
+  "version": "0.0.4",
+  "description": "poe plugin for petgpt",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "files": [
+    "dist/",
+    "src/",
+    "LICENSE",
+    "tsconfig.json",
+    "README.md",
+    "package.json"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/petgpt/petgpt-plugin-poe"
+  },
+  "homepage": "https://github.com/petgpt/petgpt-plugin-poe",
+  "scripts": {
+    "build": "tsc",
+    "pub": "yarn build && yarn publish"
+  },
+  "keywords": [
+    "petgpt",
+    "petgpt-plugin"
+  ],
+  "author": "AHGGG",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/diff": "^5.0.3",
+    "@types/node": "^18.15.11",
+    "@types/prompts": "^2.4.4",
+    "@types/random-useragent": "^0.3.1",
+    "@types/ws": "^8.5.4",
+    "typescript": "^5.0.4"
+  },
+  "dependencies": {
+    "cross-fetch": "^3.1.5",
+    "diff": "^5.1.0",
+    "dotenv": "^16.0.3",
+    "ora": "^6.1.2",
+    "prompts": "^2.4.2",
+    "random-useragent": "^0.5.0",
+    "ws": "^8.12.1"
+  }
+}
