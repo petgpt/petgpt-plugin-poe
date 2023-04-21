@@ -1,6 +1,6 @@
 {
   "name": "petgpt-plugin-poe",
-  "version": "0.0.4",
+  "version": "0.0.1",
   "description": "poe plugin for petgpt",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
