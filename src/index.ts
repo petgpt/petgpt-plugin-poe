@@ -1,8 +1,11 @@
 import {PetExpose, IPetPluginInterface, PluginData, SlotMenu} from './lib/types.js'
 import {Log} from "./lib/helper.js";
+import PoeBot from "./poe/api/PoeApi.js";
+import { v4 as uuidv4 } from 'uuid'
 
 let log: Log;
 const pluginName = 'poe'
+let chatBot: PoeBot
 
 function updateDB(ctx: PetExpose, data: any) {
     log.debug(`data: ${ctx}`, data)
@@ -16,6 +19,8 @@ function updateDB(ctx: PetExpose, data: any) {
 
 function initChatParam(ctx: PetExpose) {
     // initApi(completionParams) // 修改了completionParams，需要重新初始化api
+    chatBot = new PoeBot(ctx)
+    chatBot.init(ctx.db.get('pb_cookie'))
 }
 function initpoe(ctx: PetExpose) {
     // initEnv(ctx)
@@ -36,6 +41,14 @@ function bindEventListener(ctx: PetExpose) {
     if(!ctx.emitter.listenerCount(`plugin.${pluginName}.data`)) {
         // 监听发来的对话信息，调用poe的api，获取回复
         ctx.emitter.on(`plugin.${pluginName}.data`, (data: PluginData) => {
+            let id = uuidv4();
+            chatBot.submit(data.data, (result: string) => {
+                ctx.emitter.emit('upsertLatestText', {
+                    id: id,
+                    type: 'system',
+                    text: result
+                })
+            });
             log.debug(`[event] [plugin.${pluginName}.data] receive data:`, data)
         })
     }
@@ -50,19 +63,19 @@ function bindEventListener(ctx: PetExpose) {
                 switch (slotData.type) {
                     case 'switch': {
                         // log.debug(`${i}, switch value:`, slotData.value)
-                        ctx.db.set('enableChatContext', slotData.value)
+                        // ctx.db.set('enableChatContext', slotData.value)
                         break;
                     }
                     case 'dialog': {
-                        slotData.value.forEach((diaItem: any) => {
+                        // slotData.value.forEach((diaItem: any) => {
                             // log.debug(`${i}, dialog item:`, diaItem)
-                            ctx.db.set(diaItem.name, diaItem.value)
-                        })
+                            // ctx.db.set(diaItem.name, diaItem.value)
+                        // })
                         break;
                     }
                     case 'select': {
                         // log.debug(`${i}, select value:`, slotData.value)
-                        ctx.db.set('selectTest', slotData.value)
+                        ctx.db.set('selectChannel', slotData.value)
                         break;
                     }
                     case 'uploda': {break;}
@@ -79,116 +92,66 @@ function bindEventListener(ctx: PetExpose) {
 
     if(!ctx.emitter.listenerCount(`plugin.${pluginName}.func.clear`)) {
         // 监听clear事件
-        ctx.emitter.on(`plugin.${pluginName}.func.clear`, () => {
+        ctx.emitter.on(`plugin.${pluginName}.func.clear`, async () => {
+            await chatBot.clear(ctx.db.get("selectChannel"))
+            chatBot.init(ctx.db.get('pb_cookie'))
             log.debug(`clear`)
         })
     }
 }
 const config = (ctx: PetExpose) => [
     {
-        name: 'VITE_OPENAI_API_KEY',
-        type: 'input',
-        required: false,
-        value: ctx.db.get('VITE_OPENAI_API_KEY') || '',
-    },
-    {
-        name: 'VITE_OPENAI_ACCESS_TOKEN',
+        name: 'pb_cookie',
         type: 'input',
         required: true,
-        value: ctx.db.get('VITE_OPENAI_ACCESS_TOKEN') || '',
-    },
-    {
-        name: 'VITE_TIMEOUT_MS',
-        type: 'input',
-        required: false,
-        value: ctx.db.get('VITE_TIMEOUT_MS') || '',
-    },
-    {
-        name: 'VITE_OPENAI_API_BASE_URL',
-        type: 'input',
-        required: false,
-        value: ctx.db.get('VITE_OPENAI_API_BASE_URL') || '',
-    },
-    {
-        name: 'VITE_OPENAI_API_MODEL',
-        type: 'input',
-        required: false,
-        value: ctx.db.get('VITE_OPENAI_API_MODEL') || '',
-    },
-    {
-        name: 'VITE_API_REVERSE_PROXY',
-        type: 'input',
-        required: false,
-        value: ctx.db.get('VITE_API_REVERSE_PROXY') || '',
-    },
-    {
-        name: 'VITE_HTTPS_PROXY',
-        type: 'input',
-        required: false,
-        value: ctx.db.get('VITE_HTTPS_PROXY') || '',
-    },
-    {
-        name: 'ALL_PROXY',
-        type: 'input',
-        required: false,
-        value: ctx.db.get('ALL_PROXY') || '',
-    },
-    {
-        name: 'VITE_SOCKS_PROXY_HOST',
-        type: 'input',
-        required: false,
-        value: ctx.db.get('VITE_SOCKS_PROXY_HOST') || '',
-    },
-    {
-        name: 'VITE_SOCKS_PROXY_PORT',
-        type: 'input',
-        required: false,
-        value: ctx.db.get('VITE_SOCKS_PROXY_PORT') || '',
-    },
+        value: ctx.db.get('pb_cookie') || '',
+    }
 ]
 const slotMenu = (ctx: PetExpose): SlotMenu[] => [
-    {
-        slot: 1,
-        name: "setting",
-        menu: {
-            type: 'dialog',
-            child: [
-                {name: 'systemMessage', type: 'input', required: false,
-                    message: 'The system message helps set the behavior of the assistant. 例如：You are a helpful assistant.',
-                    default: ctx.db.get('systemMessage') || 'You are poe, a large language model trained by OpenAI. Answer as concisely as possible.\nKnowledge cutoff: 2021-09-01\n'},
-                {name: 'max_tokens', type: 'input', required: false,
-                    message: '最大2048，gpt3模型中，一次对话最多生成的token数量', default: ctx.db.get('max_tokens') || 100},
-                {name: 'temperature', type: 'input', required: false,
-                    message: '[0, 2], 默认1, 更低更精确，更高随机性增加.', default: ctx.db.get('temperature') || 1},
-                {name: 'presence_penalty', type: 'input', required: false,
-                    message: '[-2.0, 2.0], 默认0, 数值越大，越鼓励生成input中没有的文本.', default: ctx.db.get('presence_penalty') || 0},
-                {name: 'frequency_penalty', type: 'input', required: false,
-                    message: '[-2.0, 2.0], 默认0, 数值越大，降低生成的文本的重复率，更容易生成新的东西', default: ctx.db.get('frequency_penalty') || 0},
-            ]
-        },
-        description: "对话参数设置"
-    },
-    {
-        slot: 2,
-        name: 'enableChatContext',
-        menu: {
-            type: 'switch',
-            value: ctx.db.get('enableChatContext') || false
-        },
-        description: "是否开启上下文"
-    },
+    // {
+    //     slot: 1,
+    //     name: "setting",
+    //     menu: {
+    //         type: 'dialog',
+    //         child: [
+    //             {name: 'systemMessage', type: 'input', required: false,
+    //                 message: 'The system message helps set the behavior of the assistant. 例如：You are a helpful assistant.',
+    //                 default: ctx.db.get('systemMessage') || 'You are poe, a large language model trained by OpenAI. Answer as concisely as possible.\nKnowledge cutoff: 2021-09-01\n'},
+    //             {name: 'max_tokens', type: 'input', required: false,
+    //                 message: '最大2048，gpt3模型中，一次对话最多生成的token数量', default: ctx.db.get('max_tokens') || 100},
+    //             {name: 'temperature', type: 'input', required: false,
+    //                 message: '[0, 2], 默认1, 更低更精确，更高随机性增加.', default: ctx.db.get('temperature') || 1},
+    //             {name: 'presence_penalty', type: 'input', required: false,
+    //                 message: '[-2.0, 2.0], 默认0, 数值越大，越鼓励生成input中没有的文本.', default: ctx.db.get('presence_penalty') || 0},
+    //             {name: 'frequency_penalty', type: 'input', required: false,
+    //                 message: '[-2.0, 2.0], 默认0, 数值越大，降低生成的文本的重复率，更容易生成新的东西', default: ctx.db.get('frequency_penalty') || 0},
+    //         ]
+    //     },
+    //     description: "对话参数设置"
+    // },
+    // {
+    //     slot: 2,
+    //     name: 'enableChatContext',
+    //     menu: {
+    //         type: 'switch',
+    //         value: ctx.db.get('enableChatContext') || false
+    //     },
+    //     description: "是否开启上下文"
+    // },
     {
         slot: 3,
-        name: 'selectTest',
+        name: 'selectChannel',
         menu: {
             type: 'select',
             child: [
-                {name: 'label1', value: 'value1', type: 'select', required: false},
-                {name: 'label2', value: 'value2', type: 'select', required: false},
+                {name: 'ChatGPT', value: 'chinchilla', type: 'select', required: false},
+                {name: 'Claude', value: 'a2', type: 'select', required: false},
+                {name: 'Sage', value: 'capybara', type: 'select', required: false},
+                {name: 'Dragonfly', value: 'nutria', type: 'select', required: false},
             ],
-            value: ctx.db.get('selectTest') || 'value1' // 如果没有的话，默认选择第一个标签
+            value: ctx.db.get('selectChannel') || 'chinchilla' // 如果没有的话，默认选择第一个标签
         },
-        description: "selectTest"
+        description: "selectChannel to chat with"
     }
 ]
 export default (ctx: PetExpose): IPetPluginInterface => {

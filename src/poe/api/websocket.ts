@@ -14,7 +14,7 @@ const getSocketUrl = async () => {
     return `${socketUrl}/up/${boxName}/updates?min_seq=${minSeq}&channel=${channel}&hash=${hash}`;
 }
 
-export const connectWs = async () => {
+export const connectWs = async (): Promise<WebSocket> => {
     const url = await getSocketUrl();
     const ws = new WebSocket(url);
     return new Promise((resolve) => {
@@ -25,7 +25,7 @@ export const connectWs = async () => {
     });
 }
 
-export const disconnectWs = async (ws) => {
+export const disconnectWs = async (ws: WebSocket) => {
     return new Promise((resolve) => {
         ws.on('close', function close() {
             return resolve(true);
@@ -34,10 +34,10 @@ export const disconnectWs = async (ws) => {
     });
 }
 
-export const listenWs = async (ws) => {
+export const listenWs = async (ws: WebSocket, callback?: (result: string) => void) => {
     let previousText = '';
     return new Promise((resolve) => {
-        const onMessage = function incoming(data) {
+        const onMessage = function incoming(data: any) {
             let jsonData = JSON.parse(data);
             if (jsonData.messages && jsonData.messages.length > 0) {
                 const messages = JSON.parse(jsonData.messages[0]);
@@ -53,7 +53,9 @@ export const listenWs = async (ws) => {
                         }
                     });
                     previousText = text;
-                    process.stdout.write(result);
+                    // process.stdout.write(result);
+                    callback?.(result)
+                    // console.log(result)
                 } else {
                     ws.removeListener('message', onMessage);
                     return resolve(true);

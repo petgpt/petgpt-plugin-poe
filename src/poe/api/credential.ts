@@ -1,9 +1,12 @@
 import fetch from 'cross-fetch';
 import {readFileSync, writeFile} from "fs";
 
-const scrape = async () => {
-    const _pb = await fetch("https://poe.com/login"),
-        pbCookie = _pb.headers.get("set-cookie")?.split(";")[0];
+/**
+ * get the cookie | channel name | app settings
+ */
+const scrape = async (pbCookie: string) => {
+    // const _pb = await fetch("https://poe.com/login"),
+    //     pbCookie = _pb.headers.get("set-cookie")?.split(";")[0];
     const _setting = await fetch(
         'https://poe.com/api/settings',
         { headers: { cookie: `${pbCookie}` } },
@@ -18,7 +21,7 @@ const scrape = async () => {
     };
 };
 
-const getUpdatedSettings = async (channelName, pbCookie) => {
+const getUpdatedSettings = async (channelName: string, pbCookie: string) => {
     const _setting = await fetch(
         `https://poe.com/api/settings?channel=${channelName}`,
         { headers: { cookie: `${pbCookie}` } },
