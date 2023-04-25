@@ -29,22 +29,28 @@
   "author": "AHGGG",
   "license": "MIT",
   "devDependencies": {
+    "@types/crypto-js": "^4.1.1",
     "@types/diff": "^5.0.3",
     "@types/node": "^18.15.11",
     "@types/prompts": "^2.4.4",
     "@types/random-useragent": "^0.3.1",
+    "@types/uuid": "^9.0.1",
     "@types/ws": "^8.5.4",
-    "typescript": "^5.0.4",
-    "@types/uuid": "^9.0.1"
+    "typescript": "^5.0.4"
   },
   "dependencies": {
     "cross-fetch": "^3.1.5",
+    "crypto-js": "^4.1.1",
     "diff": "^5.1.0",
     "dotenv": "^16.0.3",
+    "https-proxy-agent": "^5.0.1",
+    "node-fetch": "^3.3.1",
     "ora": "^6.1.2",
+    "poe-node-api": "^0.0.3",
     "prompts": "^2.4.2",
     "random-useragent": "^0.5.0",
-    "ws": "^8.12.1",
-    "uuid": "^9.0.0"
+    "socks-proxy-agent": "^7.0.0",
+    "uuid": "^9.0.0",
+    "ws": "^8.12.1"
   }
 }

@@ -1,11 +1,11 @@
-import {PetExpose, IPetPluginInterface, PluginData, SlotMenu} from './lib/types.js'
+import {IPetPluginInterface, PetExpose, PluginData, SlotMenu} from './lib/types.js'
 import {Log} from "./lib/helper.js";
-import PoeBot from "./poe/api/PoeApi.js";
-import { v4 as uuidv4 } from 'uuid'
+import {v4 as uuidv4} from 'uuid'
+import {BotNickNameEnum, PoeClient} from "poe-node-api";
 
 let log: Log;
 const pluginName = 'poe'
-let chatBot: PoeBot
+let chatBot: PoeClient;
 
 function updateDB(ctx: PetExpose, data: any) {
     log.debug(`data: ${ctx}`, data)
@@ -19,8 +19,16 @@ function updateDB(ctx: PetExpose, data: any) {
 
 function initChatParam(ctx: PetExpose) {
     // initApi(completionParams) // 修改了completionParams，需要重新初始化api
-    chatBot = new PoeBot(ctx)
-    chatBot.init(ctx.db.get('pb_cookie'))
+    chatBot = new PoeClient({
+        debug: true,
+    })
+    let pbCookie = ctx.db.get('pb_cookie');
+    if (pbCookie) {
+        console.log(`init poe`)
+        chatBot.init();
+    } else {
+        log.error(`pb_cookie is empty!!!!`)
+    }
 }
 function initpoe(ctx: PetExpose) {
     // initEnv(ctx)
@@ -42,7 +50,7 @@ function bindEventListener(ctx: PetExpose) {
         // 监听发来的对话信息，调用poe的api，获取回复
         ctx.emitter.on(`plugin.${pluginName}.data`, (data: PluginData) => {
             let id = uuidv4();
-            chatBot.submit(data.data, (result: string) => {
+            chatBot.sendMessage(data.data, BotNickNameEnum.capybara,false,(result: string) => {
                 ctx.emitter.emit('upsertLatestText', {
                     id: id,
                     type: 'system',
@@ -93,8 +101,8 @@ function bindEventListener(ctx: PetExpose) {
     if(!ctx.emitter.listenerCount(`plugin.${pluginName}.func.clear`)) {
         // 监听clear事件
         ctx.emitter.on(`plugin.${pluginName}.func.clear`, async () => {
-            await chatBot.clear(ctx.db.get("selectChannel"))
-            chatBot.init(ctx.db.get('pb_cookie'))
+            await chatBot.addChatBreak(ctx.db.get("selectChannel"))
+            // chatBot.init(ctx.db.get('pb_cookie'))
             log.debug(`clear`)
         })
     }
@@ -144,20 +152,24 @@ const slotMenu = (ctx: PetExpose): SlotMenu[] => [
         menu: {
             type: 'select',
             child: [
-                {name: 'ChatGPT', value: 'chinchilla', type: 'select', required: false},
-                {name: 'Claude', value: 'a2', type: 'select', required: false},
-                {name: 'Sage', value: 'capybara', type: 'select', required: false},
-                {name: 'Dragonfly', value: 'nutria', type: 'select', required: false},
+                {name: 'Sage', value: BotNickNameEnum.capybara, type: 'select', required: false},
+                {name: 'ChatGPT', value: BotNickNameEnum.chinchilla, type: 'select', required: false},
+                {name: 'Claude+', value: BotNickNameEnum.a2_2, type: 'select', required: false},
+                {name: 'Dragonfly', value: BotNickNameEnum.nutria, type: 'select', required: false},
+                {name: 'Claude-instant', value: BotNickNameEnum.a2, type: 'select', required: false},
+                {name: 'GPT-4', value: BotNickNameEnum.beaver, type: 'select', required: false},
+                {name: 'NeevaAI', value: BotNickNameEnum.hutia, type: 'select', required: false},
             ],
-            value: ctx.db.get('selectChannel') || 'chinchilla' // 如果没有的话，默认选择第一个标签
+            value: ctx.db.get('selectChannel') || BotNickNameEnum.capybara // 如果没有的话，默认选择第一个标签
         },
         description: "selectChannel to chat with"
     }
 ]
 export default (ctx: PetExpose): IPetPluginInterface => {
+    let count = 0;
     const register = () => {
         log = new Log(ctx)
-        initpoe(ctx)
+        if(count++) initpoe(ctx)
         bindEventListener(ctx)
         log.debug(`[register]`)
     }
