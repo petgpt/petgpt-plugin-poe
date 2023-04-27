@@ -46,7 +46,7 @@
     "https-proxy-agent": "^5.0.1",
     "node-fetch": "^3.3.1",
     "ora": "^6.1.2",
-    "poe-node-api": "^0.0.3",
+    "poe-node-api": "^0.0.4",
     "prompts": "^2.4.2",
     "random-useragent": "^0.5.0",
     "socks-proxy-agent": "^7.0.0",

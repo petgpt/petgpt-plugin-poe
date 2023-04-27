@@ -258,13 +258,12 @@ ora@^6.1.2:
     strip-ansi "^7.0.1"
     wcwidth "^1.0.1"
 
-poe-node-api@^0.0.3:
-  version "0.0.3"
-  resolved "https://registry.npmjs.org/poe-node-api/-/poe-node-api-0.0.3.tgz#989bebe5fb6f22f4da5ed7bb4d49aaf58fe7a045"
-  integrity sha512-NFpi7AoQZrbbRpUQsjrVV+ItZjqYUENPfrqClYuEuGNkJfYpJR/fTUMXkyEnc/PyWIu3GsjONG+mgzHyCGzbqQ==
+poe-node-api@^0.0.4:
+  version "0.0.4"
+  resolved "https://registry.npmjs.org/poe-node-api/-/poe-node-api-0.0.4.tgz#41c09e4b547f557a46f0fa187e110a15c6cd87d6"
+  integrity sha512-FKm/16zY6crzew0VXOGtdy1sFhwZougEeREVfQFMtBju0X/M7RU7ddSTpgTX6NTjJGHApTHhQc7iVc9Zpqa2pA==
   dependencies:
     crypto-js "^4.1.1"
-    diff "^5.1.0"
     dotenv "^16.0.3"
     https-proxy-agent "^5.0.1"
     node-fetch "^3.3.1"
