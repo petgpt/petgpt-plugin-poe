@@ -7,6 +7,7 @@ let log: Log;
 const pluginName = 'poe'
 let chatBot: PoeClient;
 
+// 在设置里更新了配置，设置了需要的p-b cookie
 function updateDB(ctx: PetExpose, data: any) {
     log.debug(`data: ${ctx}`, data)
     Object.keys(data).forEach((key) => {
@@ -19,11 +20,13 @@ function updateDB(ctx: PetExpose, data: any) {
 
 function initChatParam(ctx: PetExpose) {
     // initApi(completionParams) // 修改了completionParams，需要重新初始化api
-    chatBot = new PoeClient({
-        debug: true,
-    })
     let pbCookie = ctx.db.get('pb_cookie');
     if (pbCookie) {
+        // 设置了cookie，重新初始化client
+        chatBot = new PoeClient({
+            cookie: ctx.db.get('pb_cookie'),
+            debug: true,
+        })
         console.log(`init poe`)
         chatBot.init();
     } else {
