@@ -50,7 +50,7 @@ function bindEventListener(ctx: PetExpose) {
         // 监听发来的对话信息，调用poe的api，获取回复
         ctx.emitter.on(`plugin.${pluginName}.data`, (data: PluginData) => {
             let id = uuidv4();
-            chatBot.sendMessage(data.data, BotNickNameEnum.capybara,false,(result: string) => {
+            chatBot.sendMessage(data.data, ctx.db.get('selectChannel'),false,(result: string) => {
                 ctx.emitter.emit('upsertLatestText', {
                     id: id,
                     type: 'system',
