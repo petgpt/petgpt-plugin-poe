@@ -258,10 +258,10 @@ ora@^6.1.2:
     strip-ansi "^7.0.1"
     wcwidth "^1.0.1"
 
-poe-node-api@^0.0.4:
-  version "0.0.4"
-  resolved "https://registry.npmjs.org/poe-node-api/-/poe-node-api-0.0.4.tgz#41c09e4b547f557a46f0fa187e110a15c6cd87d6"
-  integrity sha512-FKm/16zY6crzew0VXOGtdy1sFhwZougEeREVfQFMtBju0X/M7RU7ddSTpgTX6NTjJGHApTHhQc7iVc9Zpqa2pA==
+poe-node-api@^0.0.5:
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/poe-node-api/-/poe-node-api-0.0.5.tgz#4e3676cd7ef81886b999fa3f0ce13efd766642ea"
+  integrity sha512-awTXchIshs8dkQrRymA9Kbnq5DpqKeal3N6P4J3skpqsBKFuLtMbfnrUjI3N0qBliQ5lETV1vFLq/I7meoFtlg==
   dependencies:
     crypto-js "^4.1.1"
     dotenv "^16.0.3"
