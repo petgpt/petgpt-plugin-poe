@@ -169,12 +169,14 @@ const slotMenu = (ctx: PetExpose): SlotMenu[] => [
     }
 ]
 export default (ctx: PetExpose): IPetPluginInterface => {
-    let count = 0;
     const register = () => {
         log = new Log(ctx)
-        if(count++) initpoe(ctx)
         bindEventListener(ctx)
-        log.debug(`[register]`)
+        log.debug(`[register] listener`)
+    }
+
+    const init = () => {
+        initpoe(ctx)
     }
 
     const unregister = () => {
@@ -188,6 +190,7 @@ export default (ctx: PetExpose): IPetPluginInterface => {
     return {
         register,
         unregister,
+        init,
         config,
         slotMenu,
         handle: (data: PluginData) => new Promise(() => {
